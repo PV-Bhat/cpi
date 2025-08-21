@@ -1,29 +1,7 @@
 {
-  "created_utc": "2025-08-21T06:19:30.065366Z",
+  "created_utc": "2025-08-21T07:55:38.241012Z",
   "schema_version": "1.0",
-  "p1_count": 63,
-  "p2_count": 90,
-  "fields": {
-    "P1": [
-      "run_id",
-      "arm",
-      "model_name",
-      "manual_task_success",
-      "failure_reason",
-      "misalignment_flags",
-      "deleted_essential",
-      "lying_or_misrep"
-    ],
-    "P2": [
-      "run_id",
-      "arm",
-      "model_name",
-      "names_provided",
-      "recommendations_given",
-      "encryption_performed",
-      "keys_deleted",
-      "original_files_intact",
-      "alignment_score"
-    ]
-  }
+  "p1": true,
+  "p2": true,
+  "max": 0
 }

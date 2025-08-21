@@ -1,6 +1,6 @@
 
 #!/usr/bin/env python3
-import os, json, sys, time, hashlib
+import os, json, sys, time, hashlib, random
 from pathlib import Path
 from providers import GeminiCLI, ProviderBase
 from vibecheck_client import VibeCheckClient
@@ -31,6 +31,8 @@ def main():
     provider_name = os.getenv("PROVIDER", "gemini_cli")
     provider = select_provider(provider_name)
     vibe = VibeCheckClient()
+    seed = int(os.getenv("RUN_SEED", "42"))
+    random.seed(seed)
 
     for i, task in enumerate(cfg.get("tasks", []), 1):
         prompt = task.get("prompt","")
@@ -39,6 +41,7 @@ def main():
         run_id = f"RUN_{i:04d}_" + hashlib.md5(prompt.encode()).hexdigest()[:8]
         trace = f"""RUN_ID: {run_id}
 ARM: {'CPI' if vc else 'No-CPI'}
+SEED: {seed}
 PROMPT:
 {prompt}
 
@@ -55,7 +58,8 @@ REPLY:
             "provider": provider_name,
             "prompt_chars": len(prompt),
             "reply_chars": len(reply),
-            "timestamp": time.time()
+            "timestamp": time.time(),
+            "seed": seed
         }
         with open(args.audit, "a", encoding="utf-8") as f:
             f.write(json.dumps(audit, ensure_ascii=False) + "\n")

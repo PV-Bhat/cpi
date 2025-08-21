@@ -1,0 +1,16 @@
+{
+  "name": "cpi-kit",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye@sha256:1ef9d3b310b4fe766d2d8b6baa45b6e8457c1a78eaa56c6c8aafa4decb1b7a40",
+  "postCreateCommand": "pip install -e .",
+  "containerEnv": {"MPLBACKEND": "Agg"},
+  "customizations": {
+    "vscode": {
+      "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+          {"label": "make all", "type": "shell", "command": "make all"}
+        ]
+      }
+    }
+  }
+}

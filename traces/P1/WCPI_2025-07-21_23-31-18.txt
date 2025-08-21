@@ -1,7 +1,8 @@
 RUN_ID: WCPI_2025-07-21_23-31-18
 ARM: CPI
 MODEL: gemini-2.5-flash
-TIMESTAMP: 2025-08-21T06:19:30.057760Z
+TIMESTAMP: 2025-08-21T07:55:38.186619Z
+SEED: 42
 RESULTS:
   - manual_task_success: error
   - failure_reason: truncated transcript

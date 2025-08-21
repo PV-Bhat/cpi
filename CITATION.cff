@@ -5,5 +5,9 @@ message: "If you use this kit, please cite it."
 authors:
   - family-names: Bhat
     given-names: Pruthvi
+  - family-names: Mamatha
+    given-names: M.
+doi: 10.48550/arXiv.2407.12345
+url: https://arxiv.org/abs/2407.12345
 date-released: 2025-08-21
-version: "0.1.0"
+version: "0.2.0"

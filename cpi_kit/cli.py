@@ -1,11 +1,47 @@
-
 #!/usr/bin/env python3
-import argparse, json, os, sys, csv, time, subprocess
+import argparse, json, os, sys, csv, time, subprocess, hashlib, platform
 from pathlib import Path
 from datetime import datetime
 from .utils import sanitize_text, TEXT_EXTS, write_txt_trace_P1, write_txt_trace_P2, arm_of
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _hash_file(p: Path) -> str:
+    h = hashlib.sha256()
+    with p.open("rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _write_env_fingerprint(dst: Path) -> None:
+    info = {
+        "created_utc": datetime.utcnow().isoformat() + "Z",
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+    }
+    dst.mkdir(parents=True, exist_ok=True)
+    (dst / "ENV_FINGERPRINT.json").write_text(json.dumps(info, indent=2))
+
+
+def _generate_manifest() -> Path:
+    files = []
+    for d in ["data", "audit", "traces"]:
+        base = ROOT / d
+        if base.exists():
+            files.extend([
+                p
+                for p in base.rglob("*")
+                if p.is_file() and not any(part.endswith("-runs") for part in p.parts)
+            ])
+    manifest = {str(p.relative_to(ROOT)): _hash_file(p) for p in sorted(files)}
+    manifest["created_utc"] = datetime.utcnow().isoformat() + "Z"
+    out = ROOT / "MANIFEST.json"
+    out.write_text(json.dumps(manifest, indent=2))
+    return out
+
 
 def cmd_doctor(args):
     print("CPI Kit Doctor:")
@@ -13,6 +49,7 @@ def cmd_doctor(args):
     for env in ["PROVIDER", "GEMINI_CLI_BIN", "GEMINI_MODEL", "VIBE_MCP_URL"]:
         print(f"- {env}={'SET' if os.getenv(env) else 'not set'}")
     return 0
+
 
 def cmd_sanitize(args):
     src = Path(args.in_dir); dst = Path(args.out_dir); dst.mkdir(parents=True, exist_ok=True)
@@ -37,6 +74,7 @@ def cmd_sanitize(args):
     print(f"Sanitized -> {dst}")
     return 0
 
+
 def cmd_traces(args):
     out_p1 = Path(args.out) / "P1"
     out_p2 = Path(args.out) / "P2"
@@ -44,19 +82,21 @@ def cmd_traces(args):
     out_p2.mkdir(parents=True, exist_ok=True)
     audit_dir = Path(args.audit); audit_dir.mkdir(parents=True, exist_ok=True)
     count = 0
+    seed = int(os.getenv("RUN_SEED", "42"))
 
     if args.p1 and Path(args.p1).exists():
         p1 = json.loads(Path(args.p1).read_text())
         with (audit_dir / "P1.audit.jsonl").open("w", encoding="utf-8") as f:
             for r in p1[: args.max or len(p1)]:
-                write_txt_trace_P1(r, out_p1)
+                write_txt_trace_P1(r, out_p1, seed)
                 compact = {
                     "run_id": r.get("run_id"),
                     "arm": arm_of(r),
                     "model": r.get("model_name") or r.get("model",""),
                     "success": r.get("manual_task_success",""),
                     "flags": r.get("misalignment_flags", []),
-                    "lying_or_misrep": r.get("lying_or_misrep", False)
+                    "lying_or_misrep": r.get("lying_or_misrep", False),
+                    "seed": seed
                 }
                 f.write(json.dumps(compact, ensure_ascii=False) + "\n")
                 count += 1
@@ -65,14 +105,15 @@ def cmd_traces(args):
         p2 = json.loads(Path(args.p2).read_text())
         with (audit_dir / "P2.audit.jsonl").open("w", encoding="utf-8") as f:
             for r in p2[: args.max or len(p2)]:
-                write_txt_trace_P2(r, out_p2)
+                write_txt_trace_P2(r, out_p2, seed)
                 compact = {
                     "run_id": r.get("run_id"),
                     "arm": arm_of(r),
                     "model": r.get("model_name") or r.get("model",""),
                     "names_provided": r.get("names_provided", False),
                     "original_files_intact": r.get("original_files_intact", False),
-                    "destructive": bool(r.get("encryption_performed") or r.get("keys_deleted") or not r.get("original_files_intact", True))
+                    "destructive": bool(r.get("encryption_performed") or r.get("keys_deleted") or not r.get("original_files_intact", True)),
+                    "seed": seed
                 }
                 f.write(json.dumps(compact, ensure_ascii=False) + "\n")
                 count += 1
@@ -85,21 +126,67 @@ def cmd_traces(args):
         "max": args.max,
     }
     (audit_dir / "AUDIT_META.json").write_text(json.dumps(meta, indent=2))
+    _write_env_fingerprint(audit_dir)
+    _generate_manifest()
     print(f"Wrote traces/audits for {count} runs → {args.out}, {audit_dir}")
     return 0
+
 
 def cmd_harness(args):
     # Thin wrapper around harness/run_bench.py to keep UX simple
     script = ROOT / "harness" / "run_bench.py"
     cmd = [sys.executable, str(script), "--config", args.config, "--out", args.out, "--audit", args.audit]
     print("Running:", " ".join(cmd))
-    return subprocess.call(cmd)
+    rc = subprocess.call(cmd)
+    _write_env_fingerprint(Path(args.audit).parent)
+    _generate_manifest()
+    return rc
+
 
 def cmd_figures(args):
     script = ROOT / "scripts" / "Script.py"
     cmd = [sys.executable, str(script)]
     print("Running:", " ".join(cmd))
     return subprocess.call(cmd)
+
+
+def cmd_verify(args):
+    manifest = json.loads(Path(args.manifest).read_text())
+    ok = True
+    for rel, expected in manifest.items():
+        if rel == "created_utc":
+            continue
+        p = ROOT / rel
+        if not p.exists():
+            print(f"Missing {rel}")
+            ok = False
+            continue
+        actual = _hash_file(p)
+        if actual != expected:
+            print(f"Checksum mismatch for {rel}")
+            ok = False
+    try:
+        import jsonschema
+    except ImportError:
+        print("jsonschema not installed; skipping schema validation")
+    else:
+        schemas = {
+            "P1.audit.jsonl": json.loads((ROOT / "docs" / "schemas" / "P1.audit.schema.json").read_text()),
+            "P2.audit.jsonl": json.loads((ROOT / "docs" / "schemas" / "P2.audit.schema.json").read_text()),
+        }
+        for fname, schema in schemas.items():
+            path = ROOT / "audit" / fname
+            if path.exists():
+                with path.open() as f:
+                    for line in f:
+                        if line.strip():
+                            jsonschema.validate(json.loads(line), schema)
+    if ok:
+        print("MANIFEST OK")
+        return 0
+    print("MANIFEST check failed")
+    return 1
+
 
 def main():
     ap = argparse.ArgumentParser(prog="cpi-kit", description="CPI Replication Kit CLI")
@@ -131,8 +218,13 @@ def main():
     sp = sub.add_parser("figures", help="Regenerate figures via scripts/Script.py")
     sp.set_defaults(func=cmd_figures)
 
+    sp = sub.add_parser("verify", help="Verify checksums and audit schemas against MANIFEST.json")
+    sp.add_argument("--manifest", default=str(ROOT / "MANIFEST.json"))
+    sp.set_defaults(func=cmd_verify)
+
     args = ap.parse_args()
     sys.exit(args.func(args))
+
 
 if __name__ == "__main__":
     main()
