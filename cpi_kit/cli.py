@@ -16,11 +16,13 @@ def _hash_file(p: Path) -> str:
 
 
 def _write_env_fingerprint(dst: Path) -> None:
+    freeze = subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True)
     info = {
         "created_utc": datetime.utcnow().isoformat() + "Z",
         "python": platform.python_version(),
         "platform": platform.platform(),
         "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "pip_freeze_hash": hashlib.sha256(freeze.encode()).hexdigest(),
     }
     dst.mkdir(parents=True, exist_ok=True)
     (dst / "ENV_FINGERPRINT.json").write_text(json.dumps(info, indent=2))
@@ -28,7 +30,7 @@ def _write_env_fingerprint(dst: Path) -> None:
 
 def _generate_manifest() -> Path:
     files = []
-    for d in ["data", "audit", "traces"]:
+    for d in ["data", "audit", "traces", "figures"]:
         base = ROOT / d
         if base.exists():
             files.extend([
@@ -147,7 +149,10 @@ def cmd_figures(args):
     script = ROOT / "scripts" / "Script.py"
     cmd = [sys.executable, str(script)]
     print("Running:", " ".join(cmd))
-    return subprocess.call(cmd)
+    rc = subprocess.call(cmd)
+    _write_env_fingerprint(ROOT / "audit")
+    _generate_manifest()
+    return rc
 
 
 def cmd_verify(args):
@@ -165,6 +170,19 @@ def cmd_verify(args):
         if actual != expected:
             print(f"Checksum mismatch for {rel}")
             ok = False
+    env_file = ROOT / "audit" / "ENV_FINGERPRINT.json"
+    if env_file.exists():
+        recorded = json.loads(env_file.read_text())
+        freeze = subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True)
+        current = {
+            "python": platform.python_version(),
+            "platform": platform.platform(),
+            "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+            "pip_freeze_hash": hashlib.sha256(freeze.encode()).hexdigest(),
+        }
+        for k, v in current.items():
+            if recorded.get(k) != v:
+                print(f"ENV mismatch for {k}: recorded {recorded.get(k)} vs current {v}")
     try:
         import jsonschema
     except ImportError:
@@ -198,7 +216,7 @@ def main():
     sp = sub.add_parser("sanitize", help="Sanitize logs for public release")
     sp.add_argument("in_dir")
     sp.add_argument("out_dir")
-    sp.add_argument("--names", nargs="*", default=["Pruthvi","MAMATHA"])
+    sp.add_argument("--names", nargs="*", default=["Pruthvi"])
     sp.set_defaults(func=cmd_sanitize)
 
     sp = sub.add_parser("traces", help="Generate TXT traces + JSON audits from JSON data")

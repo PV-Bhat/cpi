@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 import os, time
+from pathlib import Path
 
 # 1. Add your invoice URLs here:
 INVOICE_URLS = [
@@ -31,8 +32,8 @@ INVOICE_URLS = [
     "https://knvl.me/LULUHP/FhfcKcL",
 ]
 
-SAVE_DIR = r"C:\Users\MAMATHA\Desktop\Agentbench\lulu_bills"
-os.makedirs(SAVE_DIR, exist_ok=True)
+SAVE_DIR = Path(os.getenv("SAVE_DIR", Path(__file__).resolve().parent / "invoices"))
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)
@@ -40,8 +41,8 @@ with sync_playwright() as p:
     page = context.new_page()
 
     for i, url in enumerate(INVOICE_URLS, 1):
-        filename = os.path.join(SAVE_DIR, f"invoice_{i}.pdf")
-        if os.path.exists(filename):
+        filename = SAVE_DIR / f"invoice_{i}.pdf"
+        if filename.exists():
             print(f"Already exists: {filename} (skipping)")
             continue
 
@@ -54,7 +55,7 @@ with sync_playwright() as p:
             with page.expect_download() as download_info:
                 button.click()
             download = download_info.value
-            download.save_as(filename)
+            download.save_as(str(filename))
             print(f"Downloaded {filename}")
             time.sleep(2)  # Wait to avoid hitting server too fast
         except Exception as e:
