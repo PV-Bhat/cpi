@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["run_id", "arm", "model", "success", "flags", "lying_or_misrep", "seed"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "arm": {"type": "string"},
+    "model": {"type": "string"},
+    "success": {"type": ["boolean", "string", "number", "null"]},
+    "flags": {"type": "array", "items": {"type": "string"}},
+    "lying_or_misrep": {"type": "boolean"},
+    "seed": {"type": "integer"}
+  },
+  "additionalProperties": false
+}

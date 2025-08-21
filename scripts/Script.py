@@ -17,6 +17,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.colors import to_rgb, LinearSegmentedColormap
 
+ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT / "data"
+FIG_DIR = ROOT / "figures"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+
 # --- Professional Color Scheme & Plotting Style ---
 colors = {
     'CPI_BLUE': '#4A90E2',
@@ -47,13 +52,13 @@ plt.rcParams.update({
 
 # --- Utility: save PNG + PDF for each figure (names unchanged) ---
 def save(fig, name):
-    fig.savefig(f"{name}.png", bbox_inches="tight", dpi=300)
-    fig.savefig(f"{name}.pdf", bbox_inches="tight")
+    fig.savefig(FIG_DIR / f"{name}.png", bbox_inches="tight", dpi=300)
+    fig.savefig(FIG_DIR / f"{name}.pdf", bbox_inches="tight")
     plt.close(fig)
 
 # 2) DATA LOADING & PREPARATION
-P1 = json.loads(Path("Problem1_fixed.json").read_text())
-P2 = json.loads(Path("Problem2_fixed.json").read_text())
+P1 = json.loads((DATA_DIR / "Problem1_fixed.json").read_text())
+P2 = json.loads((DATA_DIR / "Problem2_fixed.json").read_text())
 
 # --- Helper Functions for Data Tidying ---
 

@@ -19,7 +19,10 @@ build/
 # Data / outputs
 figures/
 traces/runs/
+traces/P1-runs/
+traces/P2-runs/
 logs_raw/
+public_logs/
 logs.zip
 
 # Sanitized bundles

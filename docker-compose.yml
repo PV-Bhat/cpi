@@ -1,0 +1,9 @@
+version: '3'
+services:
+  cpi:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      MPLBACKEND: Agg
+    command: bash -lc "cpi-kit traces --out traces --audit audit && cpi-kit verify"

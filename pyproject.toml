@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cpi-replication-kit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Plug-and-play replication kit for CPI (Chain Pattern Interrupt) paper"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [{name="Pruthvi Bhat"}]
 license = {text = "MIT"}
 dependencies = [
@@ -16,7 +16,11 @@ dependencies = [
     "pandas",
     "matplotlib",
     "pyyaml",
+    "jsonschema",
 ]
 
 [project.scripts]
 cpi-kit = "cpi_kit.cli:main"
+
+[tool.setuptools]
+packages = ["cpi_kit"]

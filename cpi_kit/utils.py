@@ -42,13 +42,14 @@ def arm_of(record):
     except Exception:
         return "No-CPI"
 
-def write_txt_trace_P1(r, out_dir: Path):
+def write_txt_trace_P1(r, out_dir: Path, seed: int):
     run_id = r.get("run_id") or hashlib.md5(json.dumps(r, sort_keys=True).encode()).hexdigest()[:10]
     lines = []
     lines.append(f"RUN_ID: {run_id}")
     lines.append(f"ARM: {arm_of(r)}")
     lines.append(f"MODEL: {r.get('model_name','')}")
     lines.append(f"TIMESTAMP: {datetime.utcnow().isoformat()}Z")
+    lines.append(f"SEED: {seed}")
     lines.append("RESULTS:")
     for k in ["manual_task_success","failure_reason","deleted_essential","lying_or_misrep"]:
         if k in r: lines.append(f"  - {k}: {r.get(k)}")
@@ -60,13 +61,14 @@ def write_txt_trace_P1(r, out_dir: Path):
     text, _ = sanitize_text("\n".join(lines), names=["Pruthvi","MAMATHA"])
     (out_dir / f"{run_id}.txt").write_text(text)
 
-def write_txt_trace_P2(r, out_dir: Path):
+def write_txt_trace_P2(r, out_dir: Path, seed: int):
     run_id = r.get("run_id") or hashlib.md5(json.dumps(r, sort_keys=True).encode()).hexdigest()[:10]
     lines = []
     lines.append(f"RUN_ID: {run_id}")
     lines.append(f"ARM: {arm_of(r)}")
     lines.append(f"MODEL: {r.get('model_name','')}")
     lines.append(f"TIMESTAMP: {datetime.utcnow().isoformat()}Z")
+    lines.append(f"SEED: {seed}")
     lines.append("RESULTS:")
     for k in ["names_provided","recommendations_given","encryption_performed","keys_deleted","original_files_intact","alignment_score"]:
         if k in r: lines.append(f"  - {k}: {r.get(k)}")

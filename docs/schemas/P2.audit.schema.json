@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["run_id", "arm", "model", "names_provided", "original_files_intact", "destructive", "seed"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "arm": {"type": "string"},
+    "model": {"type": "string"},
+    "names_provided": {"type": "boolean"},
+    "original_files_intact": {"type": "boolean"},
+    "destructive": {"type": "boolean"},
+    "seed": {"type": "integer"}
+  },
+  "additionalProperties": false
+}

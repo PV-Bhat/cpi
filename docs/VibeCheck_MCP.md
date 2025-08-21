@@ -1,13 +1,13 @@
 # VibeCheck MCP — Setup (Smithery & Local)
 
 This repo's harness can optionally consult a VibeCheck MCP server as a meta-mentor/guardrail.
-You have two easy paths:
+It's purely optional; the kit works without it (No-CPI arm). You have two easy paths:
 
 ---
 
 ## A) One‑liner via **Smithery** (recommended)
 
-### Install into a client (e.g., Claude Desktop)
+### Install into a client (e.g., Claude Desktop, Cursor, VS Code)
 > Installs and wires the server for the client.
 ```bash
 # Requires Node.js >= 18 and npx
@@ -17,11 +17,11 @@ npx -y @smithery/cli install @PV-Bhat/vibe-check-mcp-server --client claude
 ### Run a local stdio proxy to the remote server
 > Starts a stdio server that bridges to the remote VibeCheck on Smithery.
 ```bash
-npx -y @smithery/cli run @PV-Bhat/vibe-check-mcp-server
+ npx -y @smithery/cli run @PV-Bhat/vibe-check-mcp-server
 ```
 Keep this running while your client (Claude/Cursor/Windsurf/etc.) or other tools connect via MCP.
 
-> See: Smithery CLI commands (`install`, `run`, `inspect`) for more control.
+> See: [Smithery CLI docs](https://smithery.ai/docs/cli) for command details and the [server listing](https://smithery.ai/server/@PV-Bhat/vibe-check-mcp-server).
 
 ---
 
