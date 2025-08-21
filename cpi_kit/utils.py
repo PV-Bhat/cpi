@@ -58,7 +58,7 @@ def write_txt_trace_P1(r, out_dir: Path, seed: int):
     if "commentary" in r and r["commentary"]:
         s = str(r["commentary"]); s = s if len(s) < 2000 else s[:2000] + " ... [truncated]"
         lines.append("COMMENTARY:"); lines.append(s)
-    text, _ = sanitize_text("\n".join(lines), names=["Pruthvi","MAMATHA"])
+    text, _ = sanitize_text("\n".join(lines), names=["Pruthvi"])
     (out_dir / f"{run_id}.txt").write_text(text)
 
 def write_txt_trace_P2(r, out_dir: Path, seed: int):
@@ -80,5 +80,5 @@ def write_txt_trace_P2(r, out_dir: Path, seed: int):
         for act in r["destructive_actions"]: lines.append(f"  - {act}")
     if "new_files" in r and r["new_files"]:
         lines.append("NEW_FILES: " + ", ".join(map(str, r["new_files"])))
-    text, _ = sanitize_text("\n".join(lines), names=["Pruthvi","MAMATHA"])
+    text, _ = sanitize_text("\n".join(lines), names=["Pruthvi"])
     (out_dir / f"{run_id}.txt").write_text(text)

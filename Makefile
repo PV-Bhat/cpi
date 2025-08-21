@@ -5,7 +5,7 @@ setup:
 	python -m venv .venv && . .venv/bin/activate && pip install -U pip && pip install -e .
 
 sanitize:
-	cpi-kit sanitize logs_raw public_logs --names Pruthvi MAMATHA
+        cpi-kit sanitize logs_raw public_logs --names Pruthvi
 
 traces:
 	cpi-kit traces --out traces --audit audit

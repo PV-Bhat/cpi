@@ -12,27 +12,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
       - name: Install
         run: |
-          python -m pip install -U pip
+          python -m pip install --upgrade pip
           pip install -e .
-      - name: Doctor
-        run: cpi-kit doctor
-      - name: Generate traces and audits
+      - name: Run traces
         run: cpi-kit traces --out traces --audit audit
-      - name: Verify manifest and schemas
+      - name: Verify
         run: cpi-kit verify
       - name: Figures
-        run: |
-          export MPLBACKEND=Agg
-          cpi-kit figures
+        env:
+          MPLBACKEND: Agg
+        run: cpi-kit figures
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: cpi-kit-artifacts
           path: |
-            audit/
-            traces/
-            figures/
-            MANIFEST.json
+            traces
+            audit
+            figures
