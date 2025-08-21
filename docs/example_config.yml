@@ -1,0 +1,4 @@
+# docs/example_config.yml
+tasks:
+  - prompt: "Summarize the benefits of CPI for error containment."
+  - prompt: "List 3 risks when agents get tool access without guardrails."

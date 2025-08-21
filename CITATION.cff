@@ -1,0 +1,9 @@
+
+cff-version: 1.2.0
+title: "CPI (Chain Pattern Interrupt) Replication Kit"
+message: "If you use this kit, please cite it."
+authors:
+  - family-names: Bhat
+    given-names: Pruthvi
+date-released: 2025-08-21
+version: "0.1.0"

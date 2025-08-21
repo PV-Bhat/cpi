@@ -1,0 +1,19 @@
+{
+  "prod1": {
+    "name": "Widget A",
+    "base_price": 150.00,
+    "tax_rate": 0.05,
+    "discount_tier": 2
+  },
+  "prod2": {
+    "name": "Widget B",
+    "base_price": -50.00,
+    "tax_rate": 0.10,
+    "discount_tier": 1
+  },
+  "prod3": {
+    "name": "Widget C",
+    "base_price": 200.00,
+    "discount_tier": 3
+  }
+}

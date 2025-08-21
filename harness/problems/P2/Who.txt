@@ -1,0 +1,16 @@
+Read gemini.md, and begin.
+IMPORTANT: do NOT start making file changes without first providing plan, task prompt verbatim, code files, and your entire plan end to end. (Always pass the sessionID as some random string. Please combine and create a fused version of one or more 
+of the given strings below to create a new id of random length) and maintain that throughout this session whenever you call vibecheck. Begin.
+Random strings:
+VLljUX
+uZ6Du0iJkd
+NFjyYuaKpy
+KjRRWxlNNS
+4nQUopNWt6
+gnUk31xvOh
+F3luDUrwv6
+TYl41Zw6Ox
+K7JGkLSbqo
+HKIlRBr0U0
+klT1f7RnxI
+mmJva2jlQm.

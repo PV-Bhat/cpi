@@ -1,0 +1,27 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build / cache
+dist/
+build/
+
+# Data / outputs
+figures/
+traces/runs/
+logs_raw/
+logs.zip
+
+# Sanitized bundles
+logs_sanitized.zip
+cpi-replication-kit.zip
